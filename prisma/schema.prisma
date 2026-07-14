@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("OPERATOR")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Setting {
+  id           Int      @id @default(1)
+  namaSatgas   String?
+  namaKesatuan String?
+  lokasi       String?
+  komandan     String?
+  nrpKomandan  String?
+  emailSatuan  String?
+  logoPath     String?
+  updatedAt    DateTime @updatedAt
+}
+
+model Personnel {
+  id                Int      @id @default(autoincrement())
+  nrp               String
+  urut              Int?
+  nama              String
+  pktKorp           String?
+  pangkat           String?
+  kodePangkat       String?
+  kategoriPangkat   String?
+  korps             String?
+  jabatan           String?
+  jabDalamLat       String?
+  divisi            String?
+  brigade           String?
+  kelompok          String?
+  satminkal         String?
+  bagKompi          String?
+  ton               String?
+  ru                String?
+  mako              String?
+  satuan            String?
+  subSatuan         String?
+  tempatLahir       String?
+  tanggalLahir      DateTime?
+  tmtPangkat        DateTime?
+  tmtJabatan        DateTime?
+  kategoriPersonel  String?
+  sukuBangsa        String?
+  statusKeluarga    String?
+  agama             String?
+  golonganDarah     String?
+  noSkep            String?
+  namaPasangan      String?
+  jumlahAnak        Int?
+  alamat            String?
+  nik               String?
+  noKK              String?
+  npwp              String?
+  bpjs              String?
+  asabri            String?
+  keterangan        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  statuses          PersonnelStatus[]
+  assignments       PersonnelAssignment[]
+  documents         PersonnelDocument[]
+
+  @@index([nrp])
+  @@index([nama])
+}
+
+model PersonnelDocument {
+  id           Int      @id @default(autoincrement())
+  personnelId  Int
+  namaFile     String
+  filePath     String
+  mimeType     String?
+  ukuranBytes  Int?
+  createdAt    DateTime @default(now())
+  personnel    Personnel @relation(fields: [personnelId], references: [id], onDelete: Cascade)
+
+  @@index([personnelId])
+}
+
+model PersonnelStatus {
+  id             Int      @id @default(autoincrement())
+  personnelId    Int
+  tanggal        DateTime
+  statusAbsen    String?
+  statusKesiapan String?
+  statusBP       String?
+  keterangan     String?
+  personnel      Personnel @relation(fields: [personnelId], references: [id], onDelete: Cascade)
+
+  @@unique([personnelId, tanggal])
+  @@index([tanggal])
+}
+
+model PersonnelAssignment {
+  id             Int      @id @default(autoincrement())
+  personnelId    Int
+  satuan         String?
+  subSatuan      String?
+  jabatan        String?
+  jenisJabatan   String?
+  tanggalMulai   DateTime?
+  tanggalSelesai DateTime?
+  aktif          Boolean  @default(true)
+  personnel      Personnel @relation(fields: [personnelId], references: [id], onDelete: Cascade)
+
+  @@index([personnelId, aktif])
+}
+
+model ImportBatch {
+  id          Int      @id @default(autoincrement())
+  fileName    String
+  importedAt  DateTime @default(now())
+  totalRows   Int      @default(0)
+  successRows Int      @default(0)
+  failedRows  Int      @default(0)
+  status      String   @default("PROCESSING")
+}
+
+model BackupHistory {
+  id          Int      @id @default(autoincrement())
+  fileName    String
+  filePath    String
+  ukuranBytes Int?
+  status      String   @default("BERHASIL")
+  error       String?
+  createdAt   DateTime @default(now())
+}
+
+model ReportGeneration {
+  id          Int      @id @default(autoincrement())
+  jenis       String
+  periode     String?
+  fileName    String?
+  filePath    String?
+  status      String   @default("PROCESSING")
+  error       String?
+  createdAt   DateTime @default(now())
+}
+
+model ActivityLog {
+  id          Int      @id @default(autoincrement())
+  type        String
+  title       String
+  description String
+  performedBy String
+  metadata    String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([type])
+}

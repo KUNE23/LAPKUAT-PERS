@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build
+out/
+output/
+release/
+dist/
+
+# Database
+*.db
+*.db-journal
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

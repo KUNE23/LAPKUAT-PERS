@@ -1,0 +1,58 @@
+{
+  "name": "LAPKUAT_PERS",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aplikasi desktop offline untuk rekap data personel TNI",
+  "main": "out/main/main.js",
+  "scripts": {
+    "predev": "npm run db:init",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "db:generate": "prisma generate",
+    "db:init": "prisma db execute --file prisma/init.sql --schema prisma/schema.prisma",
+    "db:migrate": "prisma migrate dev --name init",
+    "package": "npm run build && electron-builder"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.7.0",
+    "docxtemplater": "^3.63.2",
+    "exceljs": "^4.4.0",
+    "fs-extra": "^11.3.0",
+    "lucide-vue-next": "^1.0.0",
+    "pinia": "^3.0.1",
+    "pizzip": "^3.2.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "electron": "^36.0.0",
+    "electron-builder": "^26.0.12",
+    "electron-vite": "^4.0.0",
+    "prisma": "^6.7.0",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.5"
+  },
+  "build": {
+    "appId": "id.tni.projectsatgas",
+    "productName": "Project Satgas",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*",
+      "prisma/**/*",
+      "dataset/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/.prisma/**/*",
+      "node_modules/@prisma/engines/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    }
+  }
+}
