@@ -17,6 +17,7 @@ declare global {
       importExcel: () => Promise<{ canceled?: boolean; totalRows?: number; successRows?: number; failedRows?: number }>
       createPersonnel: (input: Record<string, unknown>) => Promise<{ id: number }>
       generateReport: (input: Record<string, unknown>) => Promise<{ fileName: string; filePath: string }>
+      calculateReport: (type: string) => Promise<Record<string, unknown>>
       getLatestActivities: (limit?: number) => Promise<Array<{ id: number; type: string; title: string; description: string; performedBy: string; createdAt: string }>>
       getAllActivities: () => Promise<Array<{ id: number; type: string; title: string; description: string; performedBy: string; createdAt: string }>>
     }

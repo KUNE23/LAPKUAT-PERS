@@ -6,8 +6,8 @@ import DashboardPage from '../pages/dashboard/DashboardPage.vue'
 import PersonnelListPage from '../pages/personnel/PersonnelListPage.vue'
 import PersonnelCreatePage from '../pages/personnel/PersonnelCreatePage.vue'
 import ImportExcelPage from '../pages/import/ImportExcelPage.vue'
-import GenerateReportPage from '../pages/reports/GenerateReportPage.vue'
 import ActivityPage from '../pages/activity/ActivityPage.vue'
+import ReportValidationPage from '../pages/reports/ReportValidationPage.vue'
 import { useAuthStore } from '../stores/auth'
 
 export const router = createRouter({
@@ -21,7 +21,8 @@ export const router = createRouter({
     { path: '/personnel/create', component: MainLayout, children: [{ path: '', component: PersonnelCreatePage }] },
     { path: '/personnel/edit/:id', component: MainLayout, children: [{ path: '', component: PersonnelListPage }] },
     { path: '/import', component: MainLayout, children: [{ path: '', component: ImportExcelPage }] },
-    { path: '/reports', component: MainLayout, children: [{ path: '', component: GenerateReportPage }] },
+    { path: '/reports', redirect: '/report-validation' },
+    { path: '/report-validation', component: MainLayout, children: [{ path: '', component: ReportValidationPage }] },
     { path: '/backup', component: MainLayout, children: [{ path: '', component: DashboardPage }] },
     { path: '/settings', component: MainLayout, children: [{ path: '', component: DashboardPage }] }
   ]
