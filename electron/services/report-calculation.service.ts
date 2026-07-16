@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
 
 export type ReportGroup = 'pa' | 'ba' | 'ta'
-export interface GroupReportStats { nyata: number; bp: number; hadir: number; siap: number; tidakSiap: number; tidakSiapByStatus: Record<string, number>; absentByStatus: Record<string, number> }
+export interface GroupReportStats { dsppTop: number; nyata: number; bp: number; hadir: number; siap: number; tidakSiap: number; tidakSiapByStatus: Record<string, number>; absentByStatus: Record<string, number> }
 export interface LapkuatReport { generatedAt: string; total: number; pa: GroupReportStats; ba: GroupReportStats; ta: GroupReportStats; absent: Record<string, number> }
 export interface KekuatanReport extends LapkuatReport { pangkat: Record<string, number>; pangkatSatuan: Record<string, Record<string, number>> }
 export interface SatPenggantiReport { generatedAt: string; total: number; byJenis: Record<string, number>; personnelIds: number[] }
@@ -10,30 +10,38 @@ const categoryMap: Record<string, ReportGroup> = { PERWIRA: 'pa', PA: 'pa', BINT
 const absentStatuses = new Set(['SAKIT', 'CUTI', 'TAHANAN', 'LARI', 'PENUGASAN', 'LAIN-LAIN', 'DIRAWAT', 'TIDAK HADIR'])
 const readyStatuses = new Set(['SIAP', 'READY', 'SIAP OPERASI', 'SIAP UNTUK TUGAS OPERASI/LATIHAN'])
 const bpStatuses = new Set(['BP', 'YA', 'YES', 'TRUE', '1'])
+const statusLabels: Record<string, string> = { DSPP_TOP: 'DSPP/TOP', LAIN_LAIN: 'LAIN-LAIN', TUGAS_DAPUR: 'TUGAS DAPUR', TIDAK_SIAP: 'TIDAK SIAP' }
+const notReadyAttendanceStatuses = new Set(['JAGA', 'TUGAS DAPUR', 'DIRAWAT', 'DIHUKUM', 'PIKET', 'ISTIRAHAT', 'LAIN-LAIN'])
+
+function normalizeStatus(value: unknown) {
+  const raw = String(value || '').trim().toUpperCase()
+  return statusLabels[raw] || raw
+}
 
 type Snapshot = Awaited<ReturnType<typeof loadSnapshot>>
 async function loadSnapshot(prisma: PrismaClient) {
   const personnel = await prisma.personnel.findMany({ select: { id: true, kategoriPangkat: true, pangkat: true, satuan: true, subSatuan: true } })
-  const ids = personnel.map((person) => person.id)
-  const statuses = ids.length ? await prisma.personnelStatus.findMany({ where: { personnelId: { in: ids } }, orderBy: [{ tanggal: 'desc' }, { id: 'desc' }], select: { personnelId: true, statusAbsen: true, statusKesiapan: true, statusBP: true } }) : []
+  const personnelIds = new Set(personnel.map((person) => person.id))
+  const statuses = personnelIds.size ? await prisma.personnelStatus.findMany({ orderBy: [{ tanggal: 'desc' }, { id: 'desc' }], select: { personnelId: true, statusAbsen: true, statusKesiapan: true, statusBP: true } }) : []
   const latestStatus = new Map<number, (typeof statuses)[number]>()
-  for (const status of statuses) if (!latestStatus.has(status.personnelId)) latestStatus.set(status.personnelId, status)
+  for (const status of statuses) if (personnelIds.has(status.personnelId) && !latestStatus.has(status.personnelId)) latestStatus.set(status.personnelId, status)
   return { personnel, latestStatus }
 }
 
 function calculateGroups(snapshot: Snapshot) {
-  const groups: Record<ReportGroup, GroupReportStats> = { pa: { nyata: 0, bp: 0, hadir: 0, siap: 0, tidakSiap: 0, tidakSiapByStatus: {}, absentByStatus: {} }, ba: { nyata: 0, bp: 0, hadir: 0, siap: 0, tidakSiap: 0, tidakSiapByStatus: {}, absentByStatus: {} }, ta: { nyata: 0, bp: 0, hadir: 0, siap: 0, tidakSiap: 0, tidakSiapByStatus: {}, absentByStatus: {} } }
+  const groups: Record<ReportGroup, GroupReportStats> = { pa: { dsppTop: 0, nyata: 0, bp: 0, hadir: 0, siap: 0, tidakSiap: 0, tidakSiapByStatus: {}, absentByStatus: {} }, ba: { dsppTop: 0, nyata: 0, bp: 0, hadir: 0, siap: 0, tidakSiap: 0, tidakSiapByStatus: {}, absentByStatus: {} }, ta: { dsppTop: 0, nyata: 0, bp: 0, hadir: 0, siap: 0, tidakSiap: 0, tidakSiapByStatus: {}, absentByStatus: {} } }
   const absent: Record<string, number> = {}
   for (const person of snapshot.personnel) {
     const group = categoryMap[String(person.kategoriPangkat || '').trim().toUpperCase()]
     if (!group) continue
     const stats = groups[group]; stats.nyata++
-    const status = snapshot.latestStatus.get(person.id); const absence = String(status?.statusAbsen || '').trim().toUpperCase(); const readiness = String(status?.statusKesiapan || '').trim().toUpperCase(); const bp = String(status?.statusBP || '').trim().toUpperCase()
+    const status = snapshot.latestStatus.get(person.id); const absence = normalizeStatus(status?.statusAbsen); const readiness = normalizeStatus(status?.statusKesiapan); const bp = normalizeStatus(status?.statusBP)
+    if (absence === 'DSPP/TOP') stats.dsppTop++
     if (bpStatuses.has(bp)) stats.bp++
     if (absence && absentStatuses.has(absence)) { absent[absence] = (absent[absence] || 0) + 1; stats.absentByStatus[absence] = (stats.absentByStatus[absence] || 0) + 1 }
     else stats.hadir++
     if (readyStatuses.has(readiness)) stats.siap++
-    else { stats.tidakSiap++; const key = readiness || 'LAIN-LAIN'; stats.tidakSiapByStatus[key] = (stats.tidakSiapByStatus[key] || 0) + 1 }
+    else { stats.tidakSiap++; const key = notReadyAttendanceStatuses.has(absence) ? absence : readiness || 'LAIN-LAIN'; stats.tidakSiapByStatus[key] = (stats.tidakSiapByStatus[key] || 0) + 1 }
   }
   return { groups, absent }
 }

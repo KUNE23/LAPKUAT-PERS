@@ -40,6 +40,7 @@ function populateLapkuatTable(xml: string, reportData: any) {
   const groups = [reportData?.pa || {}, reportData?.ba || {}, reportData?.ta || {}]
   const totalAbsent = groups.map((group) => Object.values(group.absentByStatus || {}).reduce((sum: number, value) => sum + Number(value || 0), 0))
   const rows: Record<string, (group: any, index: number) => number> = {
+    'DSPP/TOP': (group) => Number(group.dsppTop || 0),
     'NYATA': (group) => Number(group.nyata || 0),
     'B/P': (group) => Number(group.bp || 0),
     'JUMLAH NYATA+BP': (group) => Number(group.nyata || 0) + Number(group.bp || 0),

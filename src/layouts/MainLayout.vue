@@ -10,12 +10,12 @@ const auth = useAuthStore();
 const { toast, toastType } = useToast();
 function iconName(label: string) { return ({ Dashboard: 'dashboard', Personel: 'personnel', 'Import Excel': 'import', Laporan: 'reports', 'Validasi Laporan': 'reports', 'Backup & Restore': 'backup', Pengaturan: 'settings' } as Record<string, string>)[label] || 'settings' }
 const links = [
-  { label: "Validasi Laporan", path: "/report-validation", icon: "reports" },
   { label: "Dashboard", path: "/dashboard"},
   { label: "Personel", path: "/personnel", icon: "♙" },
+  { label: "Validasi Laporan", path: "/report-validation", icon: "reports" },
   { label: "Import Excel", path: "/import", icon: "▤" },
-  { label: "Backup & Restore", path: "/backup", icon: "▰" },
-  { label: "Pengaturan", path: "/settings", icon: "⚙" },
+  // { label: "Backup & Restore", path: "/backup", icon: "▰" },
+  // { label: "Pengaturan", path: "/settings", icon: "⚙" },
 ];
 function logout() {
   auth.logout();

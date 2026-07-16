@@ -5,6 +5,7 @@ import LoginPage from '../pages/auth/LoginPage.vue'
 import DashboardPage from '../pages/dashboard/DashboardPage.vue'
 import PersonnelListPage from '../pages/personnel/PersonnelListPage.vue'
 import PersonnelCreatePage from '../pages/personnel/PersonnelCreatePage.vue'
+import PersonnelStatusEditPage from '../pages/personnel/PersonnelStatusEditPage.vue'
 import ImportExcelPage from '../pages/import/ImportExcelPage.vue'
 import ActivityPage from '../pages/activity/ActivityPage.vue'
 import ReportValidationPage from '../pages/reports/ReportValidationPage.vue'
@@ -19,7 +20,7 @@ export const router = createRouter({
     { path: '/activity', component: MainLayout, children: [{ path: '', component: ActivityPage }] },
     { path: '/personnel', component: MainLayout, children: [{ path: '', component: PersonnelListPage }] },
     { path: '/personnel/create', component: MainLayout, children: [{ path: '', component: PersonnelCreatePage }] },
-    { path: '/personnel/edit/:id', component: MainLayout, children: [{ path: '', component: PersonnelListPage }] },
+    { path: '/personnel/edit/:id', component: MainLayout, children: [{ path: '', component: PersonnelStatusEditPage }] },
     { path: '/import', component: MainLayout, children: [{ path: '', component: ImportExcelPage }] },
     { path: '/reports', redirect: '/report-validation' },
     { path: '/report-validation', component: MainLayout, children: [{ path: '', component: ReportValidationPage }] },

@@ -14,6 +14,8 @@ declare global {
       getPersonnelCount: () => Promise<number>
       getPersonnelSummary: () => Promise<{ total: number; perwira: number; bintara: number; tamtama: number }>
       getPersonnelList: (params: Record<string, unknown>) => Promise<{ items: Array<Record<string, any>>; total: number; page: number; pageSize: number; totalPages: number }>
+      getPersonnelStatusEditor: (id: number) => Promise<{ personnel: Record<string, any>; latestStatus: Record<string, any> | null }>
+      updatePersonnelStatus: (id: number, input: Record<string, unknown>) => Promise<{ status: Record<string, any> }>
       importExcel: () => Promise<{ canceled?: boolean; totalRows?: number; successRows?: number; failedRows?: number }>
       createPersonnel: (input: Record<string, unknown>) => Promise<{ id: number }>
       generateReport: (input: Record<string, unknown>) => Promise<{ fileName: string; filePath: string }>
